@@ -1,56 +1,84 @@
-// --- 1. FLOATING BACKGROUND PARTICLES (Keep this section) ---
+// --- 1. THE HEART OCEAN CANVAS ---
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
-let particles = [];
-let animationFrameId;
+let time = 0;
+let scrollPercent = 0;
 
 function initCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 }
-
-class Particle {
-    constructor() { this.reset(); }
-    reset() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 1.5;
-        this.speedX = (Math.random() - 0.5) * 0.3;
-        this.speedY = (Math.random() - 0.5) * 0.3;
-        this.opacity = Math.random() * 0.5;
-    }
-    update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.x > canvas.width || this.x < 0 || this.y > canvas.height || this.y < 0) this.reset();
-    }
-    draw() {
-        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-    }
-}
-
-function createParticles() {
-    for (let i = 0; i < 100; i++) particles.push(new Particle());
-}
-
-function animateBackground() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach(p => { p.update(); p.draw(); });
-    animationFrameId = requestAnimationFrame(animateBackground);
-}
-
 window.addEventListener('resize', initCanvas);
 initCanvas();
-createParticles();
-animateBackground();
 
-// --- 2. GSAP SCROLL ANIMATIONS (Updated for Mobile-Friendly Zooms) ---
+// Track scroll to change the ocean depth
+window.addEventListener('scroll', () => {
+    let scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    scrollPercent = window.scrollY / scrollHeight; // Goes from 0.0 to 1.0
+});
+
+function drawHeartOcean() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Background color shifts from deep blood red to pitch black based on scroll
+    let r = Math.floor(40 * (1 - scrollPercent)); 
+    let g = 0;
+    let b = Math.floor(10 * (1 - scrollPercent));
+    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw flowing waves
+    ctx.lineWidth = 2;
+    let waveCount = 5;
+    
+    for (let i = 0; i < waveCount; i++) {
+        ctx.beginPath();
+        
+        // As you scroll deeper, the waves flatten out (amplitude decreases) and vanish
+        let amplitude = (80 - (i * 10)) * (1 - scrollPercent * 1.5); 
+        if (amplitude < 0) amplitude = 0; 
+        
+        // Heartbeat pulse effect mixed with ocean drift
+        let pulse = Math.sin(time * 0.05) * 10; 
+        let yOffset = canvas.height * 0.5 + (i * 40);
+
+        for (let x = 0; x < canvas.width; x += 10) {
+            let y = yOffset + Math.sin(x * 0.01 + time * 0.02 + i) * amplitude + pulse;
+            if (x === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+        
+        // Color of the waves fades to black
+        let alpha = 0.5 * (1 - scrollPercent);
+        ctx.strokeStyle = `rgba(150, 0, 20, ${alpha})`;
+        ctx.stroke();
+    }
+    
+    // Add "bubbles" or "blood cells" that slow down and disappear in the dark
+    for(let j = 0; j < 30; j++) {
+        let px = (Math.sin(j * 14.3 + time * 0.01) * 0.5 + 0.5) * canvas.width;
+        let py = ((time * (0.5 + j * 0.05)) % canvas.height);
+        
+        let pAlpha = 0.3 * (1 - scrollPercent * 1.2);
+        if (pAlpha > 0) {
+            ctx.beginPath();
+            ctx.arc(px, py, 2, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 50, 50, ${pAlpha})`;
+            ctx.fill();
+        }
+    }
+
+    time++;
+    requestAnimationFrame(drawHeartOcean);
+}
+drawHeartOcean();
+
+// --- 2. GSAP SCROLL ANIMATIONS ---
 gsap.registerPlugin(ScrollTrigger);
 
-// Check if mobile to adjust scales (uses the variable from style.css)
 const isMobile = window.innerWidth <= 768;
 const baseZoomScale = isMobile ? 'var(--zoom-scale)' : 4;
 const finalZoomScale = isMobile ? 'var(--zoom-scale)' : 6;
@@ -65,57 +93,40 @@ const tl = gsap.timeline({
 });
 
 tl.to(".main-title", { opacity: 0, y: -50, duration: 1 })
-  
-  // Element 1 (Reality)
   .to(".element-1", { scale: baseZoomScale, opacity: 1, duration: 2 })
   .to(".element-1", { opacity: 0, scale: 6, duration: 1 })
-  
-  // Element 2 (Effort)
   .to(".element-2", { scale: baseZoomScale, opacity: 1, duration: 2 })
   .to(".element-2", { opacity: 0, scale: 6, duration: 1 })
-  
-  // Element 3 (Accountability)
   .to(".element-3", { scale: baseZoomScale, opacity: 1, duration: 2 })
   .to(".element-3", { opacity: 0, scale: 6, duration: 1 })
-  
-  // Element 4 (Remorse) -> This zooms extra so it fades "into" her face
   .to(".element-4", { scale: finalZoomScale, opacity: 1, duration: 2.5 });
 
-// --- 3. FINAL PROMPT TRIGGER & THE IMAGE REVEAL (This is the critical "End State") ---
+// --- 3. FINAL PROMPT TRIGGER & EYES REVEAL ---
 ScrollTrigger.create({
     trigger: ".scroll-container",
-    start: "98% bottom", // Triggers at the absolute bottom
+    start: "98% bottom",
     onEnter: () => {
         const box = document.getElementById('dialogueBox');
         const eyes = document.getElementById('eyesBackground');
-        const canvas = document.getElementById('bgCanvas');
-
-        // Reveal the Eyes smoothly
-        eyes.style.opacity = "1";
-        canvas.style.opacity = "0.15"; // Dim particles so eyes show through better
         
-        // Show Dialogue Box
+        eyes.style.opacity = "1";
+        
         box.classList.remove('hidden');
         setTimeout(() => box.style.opacity = "1", 50);
     },
     onLeaveBack: () => {
         const box = document.getElementById('dialogueBox');
         const eyes = document.getElementById('eyesBackground');
-        const canvas = document.getElementById('bgCanvas');
-
-        // Reset backgrounds
-        eyes.style.opacity = "0";
-        canvas.style.opacity = "1"; // Bring particles back to full brightness
         
-        // Hide Dialogue Box
+        eyes.style.opacity = "0";
+        
         box.style.opacity = "0";
         setTimeout(() => box.classList.add('hidden'), 800);
     }
 });
 
-// --- 4. NOTIFICATION LOGIC (Updated Form Endpoint) ---
+// --- 4. NOTIFICATION LOGIC ---
 function sendResponse(answer) {
-    // Linked to: https://formspree.io/f/meenogkq
     fetch("https://formspree.io/f/meenogkq", { 
         method: "POST",
         body: JSON.stringify({ response: answer }),
@@ -126,7 +137,7 @@ function sendResponse(answer) {
         `;
         setTimeout(() => {
             document.getElementById('dialogueBox').style.opacity = "0";
-            // Important: We keep her eyes visible here. The moment of reflection holds.
+            // Her eyes remain on the screen in the dark.
         }, 3000);
     });
 }
