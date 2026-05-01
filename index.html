@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Reflection</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <!-- Emotional Background Animation -->
+    <!-- Deep Space Background Animation (for desktop/large screens) -->
     <canvas id="bgCanvas"></canvas>
+    
+    <!-- Mobile Image Holder (so the animation can fade into a solid image smoothly) -->
+    <div id="eyesBackground"></div>
 
     <div class="scroll-container">
         <section class="section intro">
@@ -25,7 +28,7 @@
             <div class="core-element element-4">Remorse</div>
         </div>
 
-        <!-- The actual end of the scroll -->
+        <!-- Scroll trigger section at the absolute bottom -->
         <section class="section end-trigger"></section>
     </div>
 
