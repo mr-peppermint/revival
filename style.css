@@ -7,8 +7,18 @@ body, html {
     overflow-x: hidden;
 }
 
+#bgCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%);
+}
+
 .scroll-container {
-    height: 500vh; /* Makes the page very long for scrolling */
+    height: 600vh; /* Long page for deep scrolling */
 }
 
 .section {
@@ -16,8 +26,13 @@ body, html {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.main-title {
+    font-weight: 200;
+    letter-spacing: 15px;
     text-transform: uppercase;
-    letter-spacing: 5px;
+    opacity: 0.8;
 }
 
 .depth-wrapper {
@@ -35,42 +50,60 @@ body, html {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 2rem;
+    font-size: 2.5rem;
+    font-weight: 200;
+    letter-spacing: 8px;
+    text-transform: uppercase;
     opacity: 0;
+    white-space: nowrap;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
 }
 
-/* Dialogue Box Styling */
+/* Dialogue Box */
 #dialogueBox {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.95);
+    background: rgba(0, 0, 0, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
-    transition: opacity 0.5s ease;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
 }
 
-.hidden { display: none !important; }
+#dialogueBox.hidden {
+    display: none;
+}
 
 .dialogue-content {
     text-align: center;
     border: 1px solid #333;
-    padding: 40px;
+    padding: 50px;
     background: #000;
+    max-width: 500px;
+}
+
+.dialogue-content p {
+    font-style: italic;
+    margin-bottom: 30px;
+    line-height: 1.6;
 }
 
 .options button {
     background: none;
     border: 1px solid #fff;
     color: #fff;
-    padding: 10px 20px;
+    padding: 12px 25px;
     margin: 10px;
+    font-family: 'Inter', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
     cursor: pointer;
-    transition: 0.3s;
+    transition: 0.4s;
 }
 
 .options button:hover {
