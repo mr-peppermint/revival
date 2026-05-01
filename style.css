@@ -24,7 +24,7 @@ body, html {
     width: 100%;
     height: 100%;
     z-index: -1; 
-    background-image: url('final_eyes.png'); /* MUST BE NAMED THIS IN GITHUB */
+    background-image: url('final_eyes.jpg'); /* MUST BE NAMED THIS IN GITHUB */
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
