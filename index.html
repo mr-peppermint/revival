@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Learning</title>
+    <title>The Reflection</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <!-- Scroll Container -->
+    <!-- Emotional Background Animation -->
+    <canvas id="bgCanvas"></canvas>
+
     <div class="scroll-container">
         <section class="section intro">
-            <h1>The Reflection</h1>
+            <h1 class="main-title">The Reflection</h1>
         </section>
 
-        <!-- Animation Wrapper: Elements here will zoom/fade to simulate "depths" -->
+        <!-- Depth Elements -->
         <div class="depth-wrapper">
             <div class="core-element element-1">Reality</div>
             <div class="core-element element-2">Effort</div>
@@ -22,12 +25,11 @@
             <div class="core-element element-4">Remorse</div>
         </div>
 
-        <section class="section end-trigger">
-            <!-- Space for final animation end -->
-        </section>
+        <!-- The actual end of the scroll -->
+        <section class="section end-trigger"></section>
     </div>
 
-    <!-- Dialogue Box -->
+    <!-- Final Dialogue Box -->
     <div id="dialogueBox" class="hidden">
         <div class="dialogue-content">
             <p>"Will it stay this way angel? I wish we could be as we were few days ago."</p>
@@ -38,6 +40,7 @@
         </div>
     </div>
 
+    <!-- Animation Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="script.js"></script>
