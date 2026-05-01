@@ -7,32 +7,28 @@ body, html {
     overflow-x: hidden;
 }
 
-/* Background Particle Canvas */
 #bgCanvas {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -2; /* Stays behind everything */
-    background: radial-gradient(circle at center, #0e0e0e 0%, #000 100%);
-    opacity: 1;
+    z-index: -2; 
     transition: opacity 1.5s ease-in-out;
 }
 
-/* Final Image Holder (the eyes) */
 #eyesBackground {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1; /* Sits between the canvas and the text */
-    background-image: url('final_eyes.png'); /* Must be exact file name */
+    z-index: -1; 
+    background-image: url('final_eyes.png'); /* MUST BE NAMED THIS IN GITHUB */
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
-    filter: brightness(25%) saturate(50%); /* Dims the image for contrast */
+    filter: brightness(25%) saturate(50%);
     opacity: 0;
     transition: opacity 1.5s ease-in-out;
 }
@@ -80,14 +76,14 @@ body, html {
     text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
 }
 
-/* Dialogue Box (Transparent overlay) */
+/* Dialogue Box */
 #dialogueBox {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Transparent to show the eyes */
+    background: rgba(0, 0, 0, 0.5); 
     display: flex;
     justify-content: center;
     align-items: center;
@@ -105,7 +101,8 @@ body, html {
     padding: 50px;
     background: #000;
     max-width: 500px;
-    width: 80%; /* Good for phone */
+    width: 80%;
+    border: 1px solid #222;
 }
 
 .dialogue-content p {
@@ -133,44 +130,13 @@ body, html {
     color: #000;
 }
 
-/* ------------------------------------------- */
-/* --- MOBILE RESPONSIVENESS MEDIA QUERY --- */
-/* ------------------------------------------- */
+/* Mobile Responsiveness */
 @media screen and (max-width: 768px) {
-    /* Set global smaller font size reference for the core words */
-    :root {
-        font-size: 14px;
-    }
-
-    .main-title {
-        font-size: 2rem;
-        letter-spacing: 10px;
-    }
-
-    .core-element {
-        /* Reduce base font size so they fit the screen when zoomed */
-        font-size: 1.5rem;
-        letter-spacing: 4px;
-    }
-
-    .element-1, .element-2, .element-3 {
-        /* Set specific (smaller) mobile scales so words don't cover the full face */
-        --zoom-scale: 2.5; 
-    }
-
-    .element-4 {
-        /* The final word zooms slightly more to create the "transition" into her face */
-        --zoom-scale: 3.5;
-    }
-
-    .dialogue-content {
-        padding: 30px 20px;
-        border-width: 1px;
-    }
-
-    .options button {
-        padding: 10px 18px;
-        margin: 5px;
-        font-size: 0.8rem;
-    }
+    :root { font-size: 14px; }
+    .main-title { font-size: 2rem; letter-spacing: 10px; }
+    .core-element { font-size: 1.5rem; letter-spacing: 4px; }
+    .element-1, .element-2, .element-3 { --zoom-scale: 2.5; }
+    .element-4 { --zoom-scale: 3.5; }
+    .dialogue-content { padding: 30px 20px; }
+    .options button { padding: 10px 18px; margin: 5px; font-size: 0.8rem; }
 }
