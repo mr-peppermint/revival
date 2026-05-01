@@ -1,12 +1,12 @@
 gsap.registerPlugin(ScrollTrigger);
 
-// Depth Animation: Elements zoom toward user as they scroll down
+// 1. Core Depth Animation
 const tl = gsap.timeline({
     scrollTrigger: {
         trigger: ".scroll-container",
         start: "top top",
         end: "bottom bottom",
-        scrub: 1, // Smoothly links scroll to animation
+        scrub: 1,
     }
 });
 
@@ -18,24 +18,34 @@ tl.to(".element-1", { scale: 5, opacity: 1, zIndex: 10, duration: 1 })
   .to(".element-3", { opacity: 0, duration: 0.5 })
   .to(".element-4", { scale: 8, opacity: 1, duration: 1.5 }, "-=0.5");
 
-// Show Dialogue Box at the very bottom
+// 2. Fix: Use the end of the entire scroll container as the trigger
 ScrollTrigger.create({
-    trigger: ".end-trigger",
-    start: "bottom bottom",
-    onEnter: () => document.getElementById('dialogueBox').classList.remove('hidden'),
-    onLeaveBack: () => document.getElementById('dialogueBox').classList.add('hidden')
+    trigger: ".scroll-container",
+    start: "bottom bottom", // Only triggers when the bottom of the container hits the bottom of the screen
+    onEnter: () => {
+        document.getElementById('dialogueBox').classList.remove('hidden');
+        document.getElementById('dialogueBox').style.opacity = "1";
+    },
+    onLeaveBack: () => {
+        document.getElementById('dialogueBox').style.opacity = "0";
+        // Small delay to allow fade out before hiding
+        setTimeout(() => {
+            if(document.getElementById('dialogueBox').style.opacity === "0") {
+                document.getElementById('dialogueBox').classList.add('hidden');
+            }
+        }, 500);
+    }
 });
 
-// Notification Function
 function sendResponse(answer) {
-    // To get a notification, you can use a free service like Formspree
-    // Replace 'your-formspree-id' with an actual ID from formspree.io
     fetch("https://formspree.io/f/your-id-here", {
         method: "POST",
         body: JSON.stringify({ response: answer }),
         headers: { 'Accept': 'application/json' }
     }).then(() => {
-        alert("Your response has been sent.");
-        document.getElementById('dialogueBox').innerHTML = "<p>Thank you.</p>";
+        document.querySelector('.dialogue-content').innerHTML = "<p>Thank you for letting me know.</p>";
+        setTimeout(() => {
+            document.getElementById('dialogueBox').classList.add('hidden');
+        }, 2000);
     });
 }
