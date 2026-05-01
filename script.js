@@ -85,8 +85,8 @@ ScrollTrigger.create({
 
 // --- 4. NOTIFICATION LOGIC ---
 function sendResponse(answer) {
-    // REPLACE 'your-id-here' WITH YOUR FORMSPREE ID
-    fetch("https://formspree.io/f/your-id-here", {
+    // This is now linked to your specific Formspree form
+    fetch("https://formspree.io/f/meenogkq", { 
         method: "POST",
         body: JSON.stringify({ response: answer }),
         headers: { 'Accept': 'application/json' }
