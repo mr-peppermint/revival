@@ -7,7 +7,6 @@ function initCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     stars = [];
-    // Density matches the high-contrast look
     for (let i = 0; i < 800; i++) {
         stars.push(new Star());
     }
@@ -19,123 +18,72 @@ class Star {
         this.y = Math.random() * canvas.height;
         this.size = Math.random() * 1.5;
         this.baseOpacity = Math.random() * 0.7 + 0.3;
-        
-        // Subtle 2D drift
-        this.vx = (Math.random() - 0.5) * 0.1;
-        
-        // Parallax depth (background vs foreground stars)
         this.parallax = Math.random() * 0.4 + 0.1;
-        
         this.twinkleSpeed = Math.random() * 0.02 + 0.005;
         this.twinklePhase = Math.random() * Math.PI * 2;
     }
 
     update() {
-        // Horizontal drift
-        this.x += this.vx;
-
-        // Vertical scroll logic (Smooth Modulo wrap)
         const sTop = window.pageYOffset || document.documentElement.scrollTop || 0;
-        let scrollShift = sTop * this.parallax;
-        
-        this.renderY = (this.y - scrollShift) % canvas.height;
+        this.renderY = (this.y - (sTop * this.parallax)) % canvas.height;
         if (this.renderY < 0) this.renderY += canvas.height;
-
-        this.renderX = (this.x % canvas.width + canvas.width) % canvas.width;
-
-        // Twinkle effect
         this.twinklePhase += this.twinkleSpeed;
         this.opacity = this.baseOpacity + Math.sin(this.twinklePhase) * 0.3;
     }
 
     draw() {
         ctx.beginPath();
-        // Math.floor prevents sub-pixel blurring for a sharper, crisp look
-        ctx.arc(Math.floor(this.renderX), Math.floor(this.renderY), this.size, 0, Math.PI * 2);
+        ctx.arc(this.x, this.renderY, this.size, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-        
-        if (this.size > 1.2) {
-            ctx.shadowBlur = 4;
-            ctx.shadowColor = "white";
-        } else {
-            ctx.shadowBlur = 0;
-        }
         ctx.fill();
     }
 }
 
 function animate() {
     ctx.fillStyle = '#000';
-    ctx.shadowBlur = 0; 
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    stars.forEach(s => {
-        s.update();
-        s.draw();
-    });
+    stars.forEach(s => { s.update(); s.draw(); });
     requestAnimationFrame(animate);
 }
 
-// Initializing Starfield
 initCanvas();
 window.addEventListener('resize', initCanvas);
 animate();
 
-// --- 2. MUSIC TRIGGER LOGIC ---
+// --- 2. MUSIC TRIGGER ---
 const music = document.getElementById('bgMusic');
-
 function startMusic() {
     if (music && music.paused) {
         music.play().then(() => {
             music.volume = 0;
-            // Smoothly fade music to 30% volume
             gsap.to(music, { volume: 0.3, duration: 4 });
-            
-            // Clean up listeners
-            window.removeEventListener('scroll', startMusic);
-            window.removeEventListener('click', startMusic);
-            window.removeEventListener('touchstart', startMusic);
-        }).catch(err => console.log("Waiting for user interaction for audio..."));
+            ['scroll', 'click', 'touchstart'].forEach(ev => window.removeEventListener(ev, startMusic));
+        });
     }
 }
+['scroll', 'click', 'touchstart'].forEach(ev => window.addEventListener(ev, startMusic));
 
-window.addEventListener('scroll', startMusic);
-window.addEventListener('click', startMusic);
-window.addEventListener('touchstart', startMusic);
-
-// --- 3. GSAP CORE ANIMATIONS ---
+// --- 3. GSAP CORE & SPHERE TRANSFORM ---
 gsap.registerPlugin(ScrollTrigger);
 const sphere = document.getElementById('heartSphere');
 
-// Show sphere after initial scroll
-if (sphere) {
-    gsap.to(sphere, {
-        scrollTrigger: {
-            trigger: ".scroll-container",
-            start: "5% top",
-            toggleActions: "play none none reverse"
-        },
-        opacity: 1,
-        duration: 1
-    });
-}
+// Sphere Fade In
+gsap.to(sphere, {
+    scrollTrigger: { trigger: ".scroll-container", start: "5% top", toggleActions: "play none none reverse" },
+    opacity: 1, duration: 1
+});
 
-// Main Sphere Transformation Timeline
+// Main Sphere Gradient & Beat logic
 const mainTl = gsap.timeline({
     scrollTrigger: {
-        trigger: ".scroll-container",
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 1.5,
+        trigger: ".scroll-container", start: "top top", end: "bottom bottom", scrub: 1.5,
         onUpdate: (self) => {
-            if (!sphere) return;
             const p = self.progress;
             const gbValue = Math.floor(255 - (p * 255));
             const glowIntensity = 0.4 + (p * 0.6);
-            const highlightOffset = p * 40;
             
-            // Sphere turns from White to Red as we go deeper
-            sphere.style.background = `radial-gradient(circle at ${50 - highlightOffset}% ${50 - highlightOffset}%, 
+            // RED RADIAL SHIFT
+            sphere.style.background = `radial-gradient(circle at 30% 30%, 
                 rgba(255,255,255,1) 0%, 
                 rgb(255, ${gbValue}, ${gbValue}) 40%, 
                 rgb(${Math.max(0, gbValue - 50)}, 0, 0) 100%)`;
@@ -143,9 +91,8 @@ const mainTl = gsap.timeline({
             const bloom = 20 + (p * 100);
             sphere.style.filter = `blur(${2 + (p * 8)}px) brightness(${1 + p * 1.5})`;
             sphere.style.boxShadow = `
-                0 0 ${bloom / 2}px rgba(255, 0, 0, ${glowIntensity}),
-                0 0 ${bloom}px rgba(255, 20, 20, ${glowIntensity * 0.6}),
-                inset 0 0 15px rgba(255, 255, 255, ${0.5 - p * 0.3})
+                0 0 ${bloom/2}px rgba(255, 0, 0, ${glowIntensity}),
+                0 0 ${bloom}px rgba(255, 20, 20, ${glowIntensity * 0.6})
             `;
             
             if (p > 0.88) sphere.classList.add('beating');
@@ -155,23 +102,20 @@ const mainTl = gsap.timeline({
 });
 
 mainTl.to(".main-title", { opacity: 0, y: -50, duration: 1 });
-
-// Animate Core Phrases
 document.querySelectorAll('.core-element').forEach(el => {
-    mainTl.to(el, { opacity: 1, scale: 3, duration: 2 })
-          .to(el, { opacity: 0, scale: 5, duration: 1 });
+    mainTl.to(el, { opacity: 1, scale: 3, duration: 2 }).to(el, { opacity: 0, scale: 5, duration: 1 });
 });
 
-// --- 4. ECHO TEXT ANIMATION ---
+// --- 4. SIDE PROMPTS (ECHOES) FLYING INTO ORB ---
 document.querySelectorAll('.echo').forEach((echo, i) => {
-    echo.style.top = `${20 + (i * 12)}%`;
+    echo.style.top = `${20 + (i * 8)}%`;
     const isLeft = echo.classList.contains('left');
     
     gsap.timeline({
         scrollTrigger: {
             trigger: ".scroll-container",
             start: `${i * 10}% top`,
-            end: `${(i * 10) + 20}% top`,
+            end: `${(i * 10) + 15}% top`,
             scrub: 1
         }
     })
@@ -179,99 +123,94 @@ document.querySelectorAll('.echo').forEach((echo, i) => {
     .to(echo, { 
         x: isLeft ? (window.innerWidth/2 - 50) : -(window.innerWidth/2 - 50),
         y: (window.innerHeight/2 - echo.offsetTop),
-        fontSize: "0.2rem",
-        opacity: 0,
-        duration: 3
+        fontSize: "0rem", opacity: 0, duration: 2
     });
 });
 
-// --- 5. INTERACTIVE PARTICLES & DIALOGUE ---
+// --- 5. INTERACTIVE BRANCHING & NOTIFICATION ---
+const originalDialogue = `
+    <p>"Angel, Doubt Should Not Be Base Of Friendship. Choose Wisely You Mean Lot To ME"</p>
+    <div class="options">
+        <button onclick="sendResponse('Lets Fix It', event)">Lets Fix It Together</button>
+        <button onclick="sendResponse('Become Strangers', event)">Become Strangers</button>
+    </div>
+`;
+
 function sendResponse(answer, event) {
-    // 1. Send the notification secretly in the background
+    const textCont = document.getElementById('dialogueText');
+
+    // ALERT NOTIFICATION LOGIC
     fetch("https://formspree.io/f/meenogkq", { 
         method: "POST",
-        body: JSON.stringify({ response: answer }),
+        body: JSON.stringify({ response: answer, timestamp: new Date().toLocaleString() }),
         headers: { 'Accept': 'application/json' }
-    }).catch(error => console.error("Notification failed", error));
+    }).catch(error => console.log("Log fail silent"));
 
-    // 2. Play the visual particle effects based on her choice
-    const color = (answer === 'Yes, Sure') ? '#ffffff' : '#cc0000';
-    createParticles(event.clientX, event.clientY, color);
-    
-    // 3. Update the dialogue box text smoothly
-    const textCont = document.getElementById('dialogueText');
-    if (textCont) {
-        gsap.to(textCont, {
-            opacity: 0, 
-            duration: 0.8, 
-            onComplete: () => {
-                textCont.innerHTML = `
+    // Visual Particles
+    createParticles(event.clientX, event.clientY, answer === 'Lets Fix It' ? '#ffffff' : '#cc0000');
+
+    if (answer === 'Become Strangers') {
+        gsap.to(textCont, { opacity: 0, duration: 0.5, onComplete: () => {
+            textCont.innerHTML = `
+                <p>Really? 3% That Was Chance I Gambled For This AJ, <br>
+                Try Again You Are Stuck With Me</p>
+                <div class="options">
+                    <button onclick="resetDialogue(event)">Try Again</button>
+                    <button onclick="resetDialogue(event)">Try Again</button>
+                </div>
+            `;
+            gsap.to(textCont, { opacity: 1, duration: 0.8 });
+        }});
+    } else {
+        gsap.to(textCont, { opacity: 0, duration: 0.5, onComplete: () => {
+            textCont.innerHTML = `
+                <p>Hell Yeah Mate, We Got This.</p>
+                <div id="finalPoem" style="opacity: 0; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
                     <p>What will I <span class="highlight-red">Lose</span> if I have you?<br>
                     What will I <span class="highlight-red">Have</span> if I lose you?</p>
-                `;
-                gsap.to(textCont, { opacity: 1, duration: 1.5 });
-            }
-        });
+                </div>
+            `;
+            gsap.to(textCont, { opacity: 1, duration: 1 });
+            gsap.to("#finalPoem", { opacity: 1, duration: 2, delay: 1 });
+        }});
     }
+}
+
+function resetDialogue(event) {
+    const textCont = document.getElementById('dialogueText');
+    createParticles(event.clientX, event.clientY, '#444444');
+    gsap.to(textCont, { opacity: 0, duration: 0.4, onComplete: () => {
+        textCont.innerHTML = originalDialogue;
+        gsap.to(textCont, { opacity: 1, duration: 0.6 });
+    }});
 }
 
 function createParticles(x, y, color) {
-    for (let i = 0; i < 45; i++) {
+    for (let i = 0; i < 35; i++) {
         const p = document.createElement('div');
         p.className = 'particle';
-        p.style.backgroundColor = color;
-        // Make sure your CSS has absolute/fixed positioning for .particle
-        p.style.position = 'fixed'; 
-        p.style.width = '4px';
-        p.style.height = '4px';
-        p.style.borderRadius = '50%';
-        p.style.pointerEvents = 'none';
-        p.style.zIndex = '9999';
+        Object.assign(p.style, { backgroundColor: color, width: '4px', height: '4px', left: 0, top: 0 });
         document.body.appendChild(p);
         
         const angle = Math.random() * Math.PI * 2;
-        const dist = Math.random() * 160 + 40;
-        
+        const dist = Math.random() * 120 + 40;
         gsap.set(p, { x: x, y: y });
-        gsap.to(p, {
-            x: x + Math.cos(angle) * dist,
-            y: y + Math.sin(angle) * dist,
+        gsap.to(p, { 
+            x: x + Math.cos(angle) * dist, 
+            y: y + Math.sin(angle) * dist, 
             opacity: 0, scale: 0, duration: 1.2, 
-            onComplete: () => p.remove()
+            onComplete: () => p.remove() 
         });
     }
 }
 
-// --- 6. FINAL TRIGGER (SCENE REVEAL + MUSIC INTENSITY) ---
+// Final Trigger
 ScrollTrigger.create({
-    trigger: ".scroll-container",
-    start: "99% bottom", 
+    trigger: ".scroll-container", start: "99% bottom",
     onEnter: () => {
         const box = document.getElementById('dialogueBox');
-        const eyes = document.getElementById('eyesBackground');
-        if (box) {
-            box.classList.remove('hidden');
-            setTimeout(() => {
-                box.style.opacity = "1";
-                if (eyes) eyes.style.opacity = "1";
-            }, 10);
-        }
-        
-        // Climax: swell the music volume
-        if (music) gsap.to(music, { volume: 0.3, duration: 2 });
-    },
-    onLeaveBack: () => {
-        const box = document.getElementById('dialogueBox');
-        const eyes = document.getElementById('eyesBackground');
-        if (box) {
-            box.style.opacity = "0";
-            if (eyes) eyes.style.opacity = "0";
-            setTimeout(() => {
-                if(box.style.opacity === "0") box.classList.add('hidden');
-            }, 800);
-        }
-        
-        // Return music to calm ambient levels
-        if (music) gsap.to(music, { volume: 0.1, duration: 2 });
+        box.classList.remove('hidden');
+        gsap.to(box, { opacity: 1, duration: 1 });
+        gsap.to("#eyesBackground", { opacity: 1, duration: 1 });
     }
 });
