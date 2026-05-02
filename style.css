@@ -1,196 +1,83 @@
-/* --- RESET & BASE STYLES --- */
 body, html {
-    margin: 0;
-    padding: 0;
-    background-color: #000;
-    color: #fff;
+    margin: 0; padding: 0;
+    background-color: #000; color: #fff;
     font-family: 'Inter', sans-serif;
     overflow-x: hidden;
 }
 
-/* --- THE STARFIELD CANVAS --- */
 #bgCanvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -2; /* Keeps it at the absolute back */
-    background-color: #000;
-    
-    /* Force GPU Rendering to fix "buggy" movement */
+    position: fixed; top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: -2; background-color: #000;
     transform: translateZ(0);
-    will-change: transform;
-    pointer-events: none;
 }
 
-/* --- THE EYES BACKGROUND (BOTTOM SECTION) --- */
 #eyesBackground {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    position: fixed; top: 0; left: 0;
+    width: 100vw; height: 100vh;
     z-index: -1; 
     background-image: url('final_eyes.jpg'); 
-    background-size: cover;
-    background-position: center;
+    background-size: cover; background-position: center;
     filter: brightness(20%) saturate(30%);
-    opacity: 0;
-    transition: opacity 0.8s ease-in-out;
+    opacity: 0; transition: opacity 0.8s ease-in-out;
 }
 
-/* --- THE NEON METALLIC SPHERE --- */
 #heartSphere {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    width: 60px;
-    height: 60px;
-    background: #fff;
-    border-radius: 50%;
+    position: fixed; top: 50%; left: 50%;
+    width: 60px; height: 60px;
+    background: #fff; border-radius: 50%;
     transform: translate(-50%, -50%);
-    z-index: 5;
-    pointer-events: none;
-    opacity: 0;
-    mix-blend-mode: screen; 
-    filter: blur(2px) brightness(1);
-    transition: opacity 1s ease;
+    z-index: 5; pointer-events: none;
+    opacity: 0; mix-blend-mode: screen; 
+    filter: blur(2px);
     will-change: background, box-shadow, filter;
 }
 
-/* --- SCROLLING LAYER --- */
-.scroll-container { 
-    position: relative;
-    height: 1000vh; 
-    /* Crucial: Must be transparent to see the canvas */
-    background: transparent !important; 
-    z-index: 1;
-}
-
-.section {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    pointer-events: none; /* Allows scroll to pass through sections */
-}
-
-/* --- TEXT ELEMENTS --- */
-.main-title {
-    font-weight: 200;
-    letter-spacing: 15px;
-    text-transform: uppercase;
-}
+.scroll-container { position: relative; height: 1000vh; background: transparent; z-index: 1; }
+.section { height: 100vh; display: flex; justify-content: center; align-items: center; pointer-events: none; }
+.main-title { font-weight: 200; letter-spacing: 15px; text-transform: uppercase; }
 
 .echo {
-    position: fixed;
-    font-size: 0.75rem;
-    font-weight: 200;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.6);
-    z-index: 10;
-    opacity: 0;
-    white-space: nowrap;
+    position: fixed; font-size: 0.75rem; font-weight: 200;
+    letter-spacing: 4px; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6); z-index: 10; opacity: 0; white-space: nowrap;
 }
 .echo.left { left: 8%; }
 .echo.right { right: 8%; }
 
 .depth-wrapper {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 100;
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%); width: 100%; height: 100%;
+    pointer-events: none; z-index: 100;
 }
 
 .core-element {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2.5rem;
-    font-weight: 200;
-    letter-spacing: 8px;
-    text-transform: uppercase;
-    opacity: 0;
-    white-space: nowrap;
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%); font-size: 2.5rem;
+    font-weight: 200; letter-spacing: 8px;
+    text-transform: uppercase; opacity: 0; white-space: nowrap;
 }
 
-/* --- PARTICLES & HIGHLIGHTS --- */
-.particle {
-    position: fixed;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 2000;
-}
-
-.highlight-red {
-    color: #cc0000;
-    font-weight: 400;
-}
-
-/* --- DIALOGUE BOX (END SCENE) --- */
 #dialogueBox {
-    position: fixed;
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    display: flex; 
-    justify-content: center; 
-    align-items: center;
-    z-index: 1000; 
-    opacity: 0; 
-    transition: opacity 0.8s;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 1000; opacity: 0; transition: opacity 0.8s;
 }
+#dialogueBox.hidden { display: none; }
+.dialogue-content { text-align: center; max-width: 700px; padding: 40px; }
+.dialogue-content p { font-size: 20px; font-weight: 300; margin-bottom: 30px; letter-spacing: 1px; }
 
-#dialogueBox.hidden { 
-    display: none; 
-}
-
-.dialogue-content { 
-    text-align: center; 
-    max-width: 700px; 
-    padding: 40px; 
-}
-
-.dialogue-content p {
-    font-size: 20px; /* Your requested size */
-    line-height: 1.6;
-    font-weight: 300;
-    margin-bottom: 30px;
-    letter-spacing: 1px;
-}
-
-/* --- INTERACTIVE BUTTONS --- */
 .options button {
-    background: none; 
-    border: 1px solid #fff; 
-    color: #fff;
-    padding: 12px 25px; 
-    margin: 15px; 
-    cursor: pointer;
-    text-transform: uppercase; 
-    letter-spacing: 2px; 
-    transition: 0.3s;
-    font-size: 0.9rem;
-    pointer-events: all; /* Ensures buttons can be clicked */
+    background: none; border: 1px solid #fff; color: #fff;
+    padding: 12px 25px; margin: 15px; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 2px; transition: 0.3s;
 }
+.options button:hover { background: #fff; color: #000; }
 
-.options button:hover { 
-    background: #fff; 
-    color: #000; 
-}
+.highlight-red { color: #cc0000; font-weight: 400; }
+.particle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 2000; }
 
-/* --- ANIMATIONS --- */
 @keyframes heartBeat {
     0% { transform: translate(-50%, -50%) scale(1); filter: blur(6px) brightness(1.2); }
     15% { transform: translate(-50%, -50%) scale(1.2); filter: blur(10px) brightness(1.8); }
@@ -198,7 +85,4 @@ body, html {
     45% { transform: translate(-50%, -50%) scale(1.1); filter: blur(8px) brightness(1.5); }
     60% { transform: translate(-50%, -50%) scale(1); filter: blur(6px) brightness(1.2); }
 }
-
-.beating { 
-    animation: heartBeat 1.2s infinite ease-in-out; 
-}
+.beating { animation: heartBeat 1.2s infinite ease-in-out; }
