@@ -184,7 +184,7 @@ document.querySelectorAll('.echo').forEach((echo, i) => {
 
 // --- 5. INTERACTIVE PARTICLES & DIALOGUE ---
 function sendResponse(answer, event) {
-    const color = (answer === 'Yes, Sure') ? '#ffffff' : '#cc0000';
+    const color = (answer === 'Give A Chance') ? '#ffffff' : '#cc0000';
     createParticles(event.clientX, event.clientY, color);
     
     const textCont = document.getElementById('dialogueText');
