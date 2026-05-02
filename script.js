@@ -7,7 +7,7 @@ function initCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     stars = [];
-    // Density matches the high-contrast look of image_cf3981.png
+    // Density matches the high-contrast look
     for (let i = 0; i < 800; i++) {
         stars.push(new Star());
     }
@@ -108,15 +108,17 @@ gsap.registerPlugin(ScrollTrigger);
 const sphere = document.getElementById('heartSphere');
 
 // Show sphere after initial scroll
-gsap.to(sphere, {
-    scrollTrigger: {
-        trigger: ".scroll-container",
-        start: "5% top",
-        toggleActions: "play none none reverse"
-    },
-    opacity: 1,
-    duration: 1
-});
+if (sphere) {
+    gsap.to(sphere, {
+        scrollTrigger: {
+            trigger: ".scroll-container",
+            start: "5% top",
+            toggleActions: "play none none reverse"
+        },
+        opacity: 1,
+        duration: 1
+    });
+}
 
 // Main Sphere Transformation Timeline
 const mainTl = gsap.timeline({
@@ -126,6 +128,7 @@ const mainTl = gsap.timeline({
         end: "bottom bottom",
         scrub: 1.5,
         onUpdate: (self) => {
+            if (!sphere) return;
             const p = self.progress;
             const gbValue = Math.floor(255 - (p * 255));
             const glowIntensity = 0.4 + (p * 0.6);
@@ -184,22 +187,32 @@ document.querySelectorAll('.echo').forEach((echo, i) => {
 
 // --- 5. INTERACTIVE PARTICLES & DIALOGUE ---
 function sendResponse(answer, event) {
-    const color = (answer === 'Give A Chance') ? '#ffffff' : '#cc0000';
+    // 1. Send the notification secretly in the background
+    fetch("https://formspree.io/f/meenogkq", { 
+        method: "POST",
+        body: JSON.stringify({ response: answer }),
+        headers: { 'Accept': 'application/json' }
+    }).catch(error => console.error("Notification failed", error));
+
+    // 2. Play the visual particle effects based on her choice
+    const color = (answer === 'Yes, Sure') ? '#ffffff' : '#cc0000';
     createParticles(event.clientX, event.clientY, color);
     
+    // 3. Update the dialogue box text smoothly
     const textCont = document.getElementById('dialogueText');
-    
-    gsap.to(textCont, {
-        opacity: 0, 
-        duration: 0.8, 
-        onComplete: () => {
-            textCont.innerHTML = `
-                <p>What will I <span class="highlight-red">Lose</span> if I have you?<br>
-                What will I <span class="highlight-red">Have</span> if I lose you?</p>
-            `;
-            gsap.to(textCont, { opacity: 1, duration: 1.5 });
-        }
-    });
+    if (textCont) {
+        gsap.to(textCont, {
+            opacity: 0, 
+            duration: 0.8, 
+            onComplete: () => {
+                textCont.innerHTML = `
+                    <p>What will I <span class="highlight-red">Lose</span> if I have you?<br>
+                    What will I <span class="highlight-red">Have</span> if I lose you?</p>
+                `;
+                gsap.to(textCont, { opacity: 1, duration: 1.5 });
+            }
+        });
+    }
 }
 
 function createParticles(x, y, color) {
@@ -207,6 +220,13 @@ function createParticles(x, y, color) {
         const p = document.createElement('div');
         p.className = 'particle';
         p.style.backgroundColor = color;
+        // Make sure your CSS has absolute/fixed positioning for .particle
+        p.style.position = 'fixed'; 
+        p.style.width = '4px';
+        p.style.height = '4px';
+        p.style.borderRadius = '50%';
+        p.style.pointerEvents = 'none';
+        p.style.zIndex = '9999';
         document.body.appendChild(p);
         
         const angle = Math.random() * Math.PI * 2;
@@ -229,11 +249,13 @@ ScrollTrigger.create({
     onEnter: () => {
         const box = document.getElementById('dialogueBox');
         const eyes = document.getElementById('eyesBackground');
-        box.classList.remove('hidden');
-        setTimeout(() => {
-            box.style.opacity = "1";
-            eyes.style.opacity = "1";
-        }, 10);
+        if (box) {
+            box.classList.remove('hidden');
+            setTimeout(() => {
+                box.style.opacity = "1";
+                if (eyes) eyes.style.opacity = "1";
+            }, 10);
+        }
         
         // Climax: swell the music volume
         if (music) gsap.to(music, { volume: 0.3, duration: 2 });
@@ -241,13 +263,15 @@ ScrollTrigger.create({
     onLeaveBack: () => {
         const box = document.getElementById('dialogueBox');
         const eyes = document.getElementById('eyesBackground');
-        box.style.opacity = "0";
-        eyes.style.opacity = "0";
-        setTimeout(() => {
-            if(box.style.opacity === "0") box.classList.add('hidden');
-        }, 800);
+        if (box) {
+            box.style.opacity = "0";
+            if (eyes) eyes.style.opacity = "0";
+            setTimeout(() => {
+                if(box.style.opacity === "0") box.classList.add('hidden');
+            }, 800);
+        }
         
         // Return music to calm ambient levels
-        if (music) gsap.to(music, { volume: 0.3, duration: 2 });
+        if (music) gsap.to(music, { volume: 0.1, duration: 2 });
     }
 });
